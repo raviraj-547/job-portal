@@ -17,7 +17,10 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const corsOptions = {
-    origin:'https://job-portal-frontend-czcv.onrender.com/',
+       origin: [
+      "http://localhost:5173",
+      "https://job-portal-frontend-czcv.onrender.com"
+    ],
     credentials:true
 }
 
