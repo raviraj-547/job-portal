@@ -51,8 +51,12 @@ const Signup = () => {
         }
     }
 
-    useEffect(() => { if (user) navigate('/') }, [])
-
+    uuseEffect(() => {
+    if (user) {
+        navigate("/");
+    }
+}, [user, navigate]);
+    
     const fields = [
         { name: 'fullname',    label: 'Full Name',     type: 'text',     placeholder: 'Raviraj Somavat', icon: User },
         { name: 'email',       label: 'Email Address', type: 'email',    placeholder: 'you@example.com', icon: Mail },
