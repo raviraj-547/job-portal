@@ -35,7 +35,12 @@ app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
-
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Job Portal Backend Running 🚀"
+  });
+});
 
 app.listen(PORT,()=>{
     console.log("MONGO_URI:", process.env.MONGO_URI);
