@@ -24,48 +24,31 @@ const Signup = () => {
     const changeFileHandler = (e) => setInput({ ...input, file: e.target.files?.[0] })
 
    const submitHandler = async (e) => {
-        e.preventDefault();
-    
-        const formData = new FormData();
-        formData.append("fullname", input.fullname);
-        formData.append("email", input.email);
-        formData.append("phoneNumber", input.phoneNumber);
-        formData.append("password", input.password);
-        formData.append("role", input.role);
-    
-        if (file) {
-            formData.append("file", file);
-        }
-    
-        try {
-            dispatch(setLoading(true));
-    
-            const res = await axios.post(
-                `${USER_API_END_POINT}/register`,
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    withCredentials: true,
-                }
-            );
-    
-            if (res.data.success) {
-                toast.success(res.data.message);
-                navigate("/login");
+    e.preventDefault();
+
+    try {
+        dispatch(setLoading(true));
+
+        const res = await axios.post(
+            `${USER_API_END_POINT}/register`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                withCredentials: true,
             }
-        } catch (error) {
-            console.error(error);
-    
-            toast.error(
-                error.response?.data?.message ||
-                "Unable to create account. Please try again."
-            );
-        } finally {
-            dispatch(setLoading(false));
-        }
-    };
+        );
+
+        toast.success(res.data.message);
+        navigate("/login");
+    } catch (error) {
+        console.error(error);
+        toast.error(error.response?.data?.message || "Signup failed");
+    } finally {
+        dispatch(setLoading(false));
+    }
+};
 
     useEffect(() => {
     if (user) {
