@@ -19,7 +19,7 @@ app.use(cookieParser());
 const corsOptions = {
        origin: [
       "http://localhost:5173",
-      "https://job-portal-frontend-czcv.onrender.com"
+       process.env.FRONTEND_URL
     ],
     credentials:true
 }
