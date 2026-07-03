@@ -43,7 +43,11 @@ const Login = () => {
         }
     }
 
-    useEffect(() => { if (user) navigate('/') }, [])
+useEffect(() => {
+    if (user) {
+        navigate("/");
+    }
+}, [user, navigate]);
 
     return (
         <div className='min-h-screen flex'>
