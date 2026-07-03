@@ -38,7 +38,7 @@ app.use("/api/v1/application", applicationRoute);
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Job Portal Backend Running 🚀"
+    message: "Job Portal Backend Running"
   });
 });
 
