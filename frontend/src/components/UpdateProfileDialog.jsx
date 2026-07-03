@@ -19,7 +19,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         email: user?.email || "",
         phoneNumber: user?.phoneNumber || "",
         bio: user?.profile?.bio || "",
-        skills: user?.profile?.skills?.map(skill => skill) || "",
+        skills: user?.profile?.skills?.join(", ") || "",
         file: user?.profile?.resume || ""
     });
     const dispatch = useDispatch();

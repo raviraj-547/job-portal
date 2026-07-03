@@ -17,7 +17,7 @@ import applicationSlice from "./applicationSlice";
 const persistConfig = {
     key: 'root',
     version: 1,
-    storage,
+    storage: storage?.default || storage,
 }
 
 const rootReducer = combineReducers({

@@ -28,72 +28,40 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-lg: 1.5rem;
+  --radius-md: 1rem;
+  --radius-sm: 0.75rem;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 20% 98%;
+    --foreground: 240 10% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 10% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 245 50% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 15% 95%;
+    --secondary-foreground: 240 10% 12%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 10% 96%;
+    --muted-foreground: 240 8% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 245 50% 55%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 240 15% 93%;
+    --input: 240 15% 93%;
+    --ring: 245 50% 55%;
   }
 }
 
@@ -103,5 +71,140 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
   }
+}
+
+/* ─── Pastel Card Surface ───────────────────────────────── */
+.pastel-card {
+  background: #ffffff;
+  border: 1px solid #ebedf5;
+  box-shadow: 0 12px 36px -12px rgba(93, 83, 196, 0.05);
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pastel-card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 48px -10px rgba(93, 83, 196, 0.08);
+  border-color: #d8dbed;
+}
+
+/* ─── Floating Navbar ───────────────────────────────────── */
+.pastel-navbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid #ebedf5;
+}
+
+/* ─── Pastel Accent Badges ──────────────────────────────── */
+.pastel-badge-purple {
+  background-color: #f1efff;
+  color: #5d53c4;
+  border: 1px solid #e0dbff;
+}
+
+.pastel-badge-green {
+  background-color: #e6f7f2;
+  color: #1b7c5f;
+  border: 1px solid #d2f2e8;
+}
+
+.pastel-badge-orange {
+  background-color: #fff2eb;
+  color: #d35400;
+  border: 1px solid #ffe3d3;
+}
+
+.pastel-badge-blue {
+  background-color: #e8f4fd;
+  color: #0d47a1;
+  border: 1px solid #d1e8fc;
+}
+
+/* ─── Pastel Buttons ────────────────────────────────────── */
+.btn-pastel-primary {
+  background-color: #5d53c4;
+  color: #ffffff;
+  border-radius: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-pastel-primary:hover {
+  background-color: #4b41b3;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -6px rgba(93, 83, 196, 0.4);
+}
+
+.btn-pastel-secondary {
+  background-color: #f1efff;
+  color: #5d53c4;
+  border-radius: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-pastel-secondary:hover {
+  background-color: #e3dfff;
+  transform: translateY(-1px);
+}
+
+.btn-pastel-outline {
+  background-color: transparent;
+  color: #5e6475;
+  border: 1px solid #ebedf5;
+  border-radius: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-pastel-outline:hover {
+  background-color: #f5f6fa;
+  border-color: #d8dbed;
+  color: #1a1a24;
+}
+
+/* ─── Soft UI Gradients ─────────────────────────────────── */
+.pastel-gradient-hero {
+  background: radial-gradient(circle at top left, #f3f1ff 0%, transparent 60%),
+              radial-gradient(circle at bottom right, #e2f7f1 0%, transparent 60%),
+              #fcfcff;
+}
+
+/* ─── Custom Form Controls ──────────────────────────────── */
+.pastel-input {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e1e4ed;
+  color: #1a1a24;
+  border-radius: 0.85rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+.pastel-input::placeholder {
+  color: #a0a6b5;
+}
+.pastel-input:focus {
+  outline: none;
+  border-color: #5d53c4;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(93, 83, 196, 0.1);
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f5f6fa;
+}
+::-webkit-scrollbar-thumb {
+  background: #dcdfe8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd0dd;
 }
