@@ -24,23 +24,24 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault()
-        if (!input.role) { toast.error('Please select a role.'); return }
-        try {
-            dispatch(setLoading(true))
-            const res = await axios.post(`${USER_API_END_POINT}/login`, input, {
-                headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
-            })
-            if (res.data.success) {
-                dispatch(setUser(res.data.user))
-                navigate('/')
-                toast.success(res.data.message)
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Login failed.')
-        } finally {
-            dispatch(setLoading(false))
-        }
+       try {
+    dispatch(setLoading(true));
+
+    const res = await axios.post(
+        `${USER_API_END_POINT}/login`,
+        input,
+        { withCredentials: true }
+    );
+
+    dispatch(setLoading(false));
+
+    if (res.data.success) {
+        navigate("/");
+    }
+} catch (error) {
+    dispatch(setLoading(false));   // IMPORTANT
+    toast.error(error.response?.data?.message || "Login failed");
+}
     }
 
 useEffect(() => {
