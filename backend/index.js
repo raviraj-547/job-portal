@@ -30,10 +30,10 @@ const PORT = process.env.PORT || 3000;
 
 
 // api's
-app.use("https://job-portal-gks0.onrender.com/api/v1/user", userRoute);
-app.use("https://job-portal-gks0.onrender.com/api/v1/company", companyRoute);
-app.use("https://job-portal-gks0.onrender.com/api/v1/job", jobRoute);
-app.use("https://job-portal-gks0.onrender.com/api/v1/application", applicationRoute);
+app.use("/api/v1/user", userRoute);
+app.use("/api/v1/company", companyRoute);
+app.use("/api/v1/job", jobRoute);
+app.use("/api/v1/application", applicationRoute);
 
 
 
