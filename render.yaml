@@ -1,0 +1,13 @@
+services:
+  # Frontend Static Site
+  - type: web
+    name: job-portal-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm run build
+    publishPath: dist
+    routes:
+      # Catch-all rewrite for React Router SPA (resolves 404 on refresh/direct load)
+      - src: /*
+        dest: /index.html
+        status: 200

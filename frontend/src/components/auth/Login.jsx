@@ -24,26 +24,33 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault()
-       try {
-    dispatch(setLoading(true));
+        try {
+            dispatch(setLoading(true));
 
-    const res = await axios.post(
-        `${USER_API_END_POINT}/login`,
-        input,
-        { withCredentials: true }
-    );
+            const res = await axios.post(
+                `${USER_API_END_POINT}/login`,
+                input,
+                {
+                    withCredentials: true,
+                    timeout: 20000, // 20s — accounts for Render free-tier cold start
+                }
+            );
 
-    dispatch(setLoading(false));
-
-    if (res.data.success) {
-        dispatch(setUser(res.data.user));
-        toast.success(res.data.message);
-        navigate("/");
-    }
-} catch (error) {
-    dispatch(setLoading(false));   // IMPORTANT
-    toast.error(error.response?.data?.message || "Login failed");
-}
+            if (res.data.success) {
+                dispatch(setUser(res.data.user));
+                toast.success(res.data.message);
+                navigate("/");
+            }
+        } catch (error) {
+            console.error(error);
+            if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+                toast.error("Server is waking up, please try again in a moment.");
+            } else {
+                toast.error(error.response?.data?.message || "Login failed. Please try again.");
+            }
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
 
 useEffect(() => {
