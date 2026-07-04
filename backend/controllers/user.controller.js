@@ -15,7 +15,7 @@ export const register = async (req, res) => {
             });
         };
         const file = req.file;
-        // #endregion
+      
         let profilePhoto = "";
         if (file) {
             const fileUri = getDataUri(file);
@@ -97,21 +97,34 @@ export const login = async (req, res) => {
             profile: user.profile
         }
 
-        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict' }).json({
-            message: `Welcome back ${user.fullname}`,
-            user,
-            success: true
-        })
+            res.status(200)
+            .cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "lax",
+                maxAge: 24 * 60 * 60 * 1000,
+            })
+            .json({
+                message: `Welcome back ${user.fullname}`,
+                user,
+                success: true
+});
     } catch (error) {
         console.log(error);
     }
 }
 export const logout = async (req, res) => {
     try {
-        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-            message: "Logged out successfully.",
-            success: true
-        })
+        return res.status(200).cookie("token", "", {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: process.env.NODE_ENV === "production"
+                        ? "none"
+                        : "lax",
+                    maxAge: 0,
+                })
     } catch (error) {
         console.log(error);
     }
