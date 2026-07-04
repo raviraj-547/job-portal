@@ -41,7 +41,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         formData.append("phoneNumber", input.phoneNumber);
         formData.append("bio", input.bio);
         formData.append("skills", input.skills);
-        if (input.file) {
+        if (input.file && typeof input.file === 'object') {
             formData.append("file", input.file);
         }
         try {
@@ -55,15 +55,14 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             if (res.data.success) {
                 dispatch(setUser(res.data.user));
                 toast.success(res.data.message);
+                setOpen(false);
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message);
-        } finally{
+            toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
+        } finally {
             setLoading(false);
         }
-        setOpen(false);
-        console.log(input);
     }
 
 

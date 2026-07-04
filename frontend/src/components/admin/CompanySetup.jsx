@@ -40,7 +40,7 @@ const CompanySetup = () => {
         formData.append("description", input.description);
         formData.append("website", input.website);
         formData.append("location", input.location);
-        if (input.file) {
+        if (input.file && typeof input.file === 'object') {
             formData.append("file", input.file);
         }
         try {
@@ -69,7 +69,7 @@ const CompanySetup = () => {
             description: singleCompany?.description || "",
             website: singleCompany?.website || "",
             location: singleCompany?.location || "",
-            file: singleCompany?.file || null
+            file: singleCompany?.logo || null
         })
     }, [singleCompany]);
 
@@ -134,7 +134,7 @@ const CompanySetup = () => {
                                     </div>
                                     <div className='flex-1 min-w-0'>
                                         <p className='text-xs text-[#a0a6b5] group-hover:text-slate-600 truncate'>
-                                            {input.file && typeof input.file === 'object' ? input.file.name : 'Select business logo photo'}
+                                            {input.file ? (typeof input.file === 'object' ? input.file.name : input.file.split('/').pop()) : 'Select business logo photo'}
                                         </p>
                                     </div>
                                     <input
