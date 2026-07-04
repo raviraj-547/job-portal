@@ -1,0 +1,6 @@
+{"sessionId":"7985e6","location":"db.js:connectDB","message":"mongodb connected","data":{"connected":true},"hypothesisId":"F","runId":"backend-audit","timestamp":1783145000243}
+{"sessionId":"7985e6","location":"backend-check","message":"jobs get","data":{"status":200,"success":true,"count":0},"hypothesisId":"F","runId":"backend-audit-postfix","timestamp":1783145028895}
+{"sessionId":"7985e6","location":"backend-check","message":"register no file","data":{"status":201,"success":true,"message":"Account created successfully."},"hypothesisId":"C","runId":"backend-audit-postfix","timestamp":1783145029025}
+{"sessionId":"7985e6","location":"backend-check","message":"login","data":{"status":200,"success":true,"hasUser":true},"hypothesisId":"A","runId":"backend-audit-postfix","timestamp":1783145029154}
+{"sessionId":"7985e6","location":"backend-check","message":"logout","data":{"status":200,"success":true,"message":"Logged out successfully."},"hypothesisId":"G","runId":"backend-audit-postfix","timestamp":1783145029173}
+{"sessionId":"7985e6","location":"db.js:connectDB","message":"mongodb connected","data":{"connected":true},"hypothesisId":"F","runId":"backend-audit","timestamp":1783145153203}
