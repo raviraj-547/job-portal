@@ -139,6 +139,13 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                     className="col-span-3"
                                 />
                             </div>
+                            {user?.profile?.resume && (
+                                <div className='grid grid-cols-4 items-center gap-4 -mt-2'>
+                                    <span className="col-start-2 col-span-3 text-[11px] text-[#5e6475] font-semibold truncate">
+                                        Active Resume: <a href={user.profile.resume} target="_blank" rel="noopener noreferrer" className="text-[#5d53c4] hover:underline font-bold">{user.profile.resumeOriginalName || "View Document"}</a>
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <DialogFooter>
                             {
