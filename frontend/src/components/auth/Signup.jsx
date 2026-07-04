@@ -55,7 +55,7 @@ const Signup = () => {
                         "Content-Type": "multipart/form-data",
                     },
                     withCredentials: true,
-                    timeout: 20000, // 20s — accounts for Render free-tier cold start
+                    timeout: 60000, // 60s — accounts for Render free-tier cold start
                 }
             );
 
