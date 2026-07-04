@@ -111,6 +111,12 @@ export const updateCompany = async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        if (error.code === 11000) {
+            return res.status(400).json({
+                message: "A company with this name already exists.",
+                success: false
+            });
+        }
         return res.status(500).json({
             message: "Internal server error.",
             success: false
