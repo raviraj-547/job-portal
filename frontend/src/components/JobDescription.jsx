@@ -13,10 +13,13 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const hasUserApplied = (applications, userId) =>
+    applications?.some(application => String(application.applicant) === String(userId)) || false;
+
 const JobDescription = () => {
     const { singleJob } = useSelector(store => store.job);
     const { user } = useSelector(store => store.auth);
-    const isInitiallyApplied = singleJob?.applications?.some(application => application.applicant === user?._id) || false;
+    const isInitiallyApplied = hasUserApplied(singleJob?.applications, user?._id);
     const [isApplied, setIsApplied] = useState(isInitiallyApplied);
 
     const params = useParams();
@@ -45,7 +48,11 @@ const JobDescription = () => {
                 const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, { withCredentials: true });
                 if (res.data.success) {
                     dispatch(setSingleJob(res.data.job));
-                    setIsApplied(res.data.job.applications.some(application => application.applicant === user?._id))
+                    const applied = hasUserApplied(res.data.job.applications, user?._id);
+                    // #region agent log
+                    fetch('http://127.0.0.1:7688/ingest/48fa31b3-06f2-4b31-be74-84d918315c47',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'7985e6'},body:JSON.stringify({sessionId:'7985e6',location:'JobDescription.jsx:fetchSingleJob',message:'applied status check',data:{userId:user?._id,applicantSamples:res.data.job.applications.slice(0,3).map(a=>({applicant:a.applicant,applicantType:typeof a.applicant,strictMatch:a.applicant===user?._id,stringMatch:String(a.applicant)===String(user?._id)})),computedApplied:applied},timestamp:Date.now(),hypothesisId:'E',runId:'post-fix'})}).catch(()=>{});
+                    // #endregion
+                    setIsApplied(applied)
                 }
             } catch (error) {
                 console.log(error);
