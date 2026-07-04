@@ -169,7 +169,7 @@ export const updateProfile = async (req, res) => {
         if(file){
             try {
                 const fileUri = getDataUri(file);
-                const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+                const cloudResponse = await cloudinary.uploader.upload(fileUri.content, { resource_type: "auto" });
                 if(cloudResponse){
                     user.profile.resume = cloudResponse.secure_url;
                     user.profile.resumeOriginalName = file.originalname;
