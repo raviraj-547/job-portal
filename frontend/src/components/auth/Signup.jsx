@@ -76,10 +76,11 @@ const Signup = () => {
     };
 
     useEffect(() => {
+        dispatch(setLoading(false));
         if (user) {
             navigate("/");
         }
-    }, [user, navigate]);
+    }, [user, navigate, dispatch]);
     
     const fields = [
         { name: 'fullname',    label: 'Full Name',     type: 'text',     placeholder: 'Raviraj Somavat', icon: User },

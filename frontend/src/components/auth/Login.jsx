@@ -24,6 +24,10 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault()
+        if (!input.role) {
+            toast.error("Please select whether you are a Job Seeker or a Recruiter.");
+            return;
+        }
         try {
             dispatch(setLoading(true));
 
@@ -53,11 +57,12 @@ const Login = () => {
         }
     }
 
-useEffect(() => {
-    if (user) {
-        navigate("/");
-    }
-}, [user, navigate]);
+    useEffect(() => {
+        dispatch(setLoading(false));
+        if (user) {
+            navigate("/");
+        }
+    }, [user, navigate, dispatch]);
 
     return (
         <div className='min-h-screen flex'>
