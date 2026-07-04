@@ -55,6 +55,7 @@ const Signup = () => {
                         "Content-Type": "multipart/form-data",
                     },
                     withCredentials: true,
+                    timeout: 20000, // 20s — accounts for Render free-tier cold start
                 }
             );
 
@@ -64,7 +65,11 @@ const Signup = () => {
             }
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || "Signup failed");
+            if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+                toast.error("Server is waking up, please try again in a moment.");
+            } else {
+                toast.error(error.response?.data?.message || "Signup failed. Please try again.");
+            }
         } finally {
             dispatch(setLoading(false));
         }
