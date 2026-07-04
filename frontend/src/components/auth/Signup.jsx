@@ -23,38 +23,58 @@ const Signup = () => {
     const changeEventHandler = (e) => setInput({ ...input, [e.target.name]: e.target.value })
     const changeFileHandler = (e) => setInput({ ...input, file: e.target.files?.[0] })
 
-   const submitHandler = async (e) => {
-    e.preventDefault();
+    const submitHandler = async (e) => {
+        e.preventDefault();
 
-    try {
-        dispatch(setLoading(true));
+        // FIX: Check if role is selected to prevent bad requests
+        if (!input.role) {
+            toast.error("Please select whether you are a Job Seeker or a Recruiter.");
+            return;
+        }
 
-        const res = await axios.post(
-            `${USER_API_END_POINT}/register`,
-            formData,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: true,
+        // FIX: Construct the missing FormData object
+        const formData = new FormData();
+        formData.append("fullname", input.fullname);
+        formData.append("email", input.email);
+        formData.append("phoneNumber", input.phoneNumber);
+        formData.append("password", input.password);
+        formData.append("role", input.role);
+        
+        if (input.file) {
+            formData.append("file", input.file);
+        }
+
+        try {
+            dispatch(setLoading(true));
+
+            const res = await axios.post(
+                `${USER_API_END_POINT}/register`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            if (res.data?.success || res.status === 200 || res.status === 201) {
+                toast.success(res.data?.message || "Account created successfully!");
+                navigate("/login");
             }
-        );
-
-        toast.success(res.data.message);
-        navigate("/login");
-    } catch (error) {
-        console.error(error);
-        toast.error(error.response?.data?.message || "Signup failed");
-    } finally {
-        dispatch(setLoading(false));
-    }
-};
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Signup failed");
+        } finally {
+            dispatch(setLoading(false));
+        }
+    };
 
     useEffect(() => {
-    if (user) {
-        navigate("/");
-    }
-}, [user, navigate]);
+        if (user) {
+            navigate("/");
+        }
+    }, [user, navigate]);
     
     const fields = [
         { name: 'fullname',    label: 'Full Name',     type: 'text',     placeholder: 'Raviraj Somavat', icon: User },
@@ -156,6 +176,7 @@ const Signup = () => {
                                         value={input[name]}
                                         onChange={changeEventHandler}
                                         placeholder={placeholder}
+                                        required
                                         className='w-full bg-white border border-[#e1e4ed] rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1a1a24] placeholder:text-[#c0c6d5] outline-none focus:border-[#5d53c4] focus:ring-2 focus:ring-[#5d53c4]/10 transition-all'
                                     />
                                 </div>
@@ -234,4 +255,4 @@ const Signup = () => {
     )
 }
 
-export default Signup
+export default Signup;
