@@ -89,9 +89,17 @@ export const updateCompany = async (req, res) => {
         // idhar cloudinary ayega
         let logo;
         if(file){
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            logo = cloudResponse.secure_url;
+            try {
+                const fileUri = getDataUri(file);
+                const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+                logo = cloudResponse.secure_url;
+            } catch (uploadError) {
+                console.error("Cloudinary upload error:", uploadError);
+                return res.status(500).json({
+                    message: "Failed to upload logo image. Please check Cloudinary configuration.",
+                    success: false
+                });
+            }
         }
     
         const updateData = { name, description, website, location, ...(logo && { logo }) };
