@@ -1,14 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="JobPortal — Find your dream job. Search thousands of opportunities across tech, design, and more. Apply today." />
+    <meta name="description" content="JobPortal — Find your dream job. Search thousands of curated opportunities across tech, design, and more. Apply with one click today." />
+    <meta name="keywords" content="jobs, job portal, careers, hiring, tech jobs, developer jobs, remote work" />
+    <meta property="og:title" content="JobPortal — Find Your Dream Job" />
+    <meta property="og:description" content="Browse thousands of curated jobs from top companies. Land your dream career." />
+    <meta property="og:type" content="website" />
     <title>JobPortal — Find Your Dream Job</title>
+    <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- Dark mode initialization: prevent flash of wrong theme -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('jp-theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.classList.remove('light', 'dark');
+          document.documentElement.classList.add(theme);
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

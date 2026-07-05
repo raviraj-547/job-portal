@@ -1,203 +1,257 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react'
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import Navbar from './shared/Navbar';
-import { motion } from 'framer-motion';
+import Footer from './shared/Footer';
 import {
-    MapPin, Banknote, Briefcase, Users, Calendar, Clock,
-    CheckCircle2, Zap, Building2, ArrowLeft
+  MapPin, Banknote, Briefcase, Users, Calendar, Clock,
+  CheckCircle2, Zap, Building2, ArrowLeft, Share2, Bookmark
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 
 const hasUserApplied = (applications, userId) =>
-    applications?.some(application => String(application.applicant) === String(userId)) || false;
+  applications?.some(application => String(application.applicant) === String(userId)) || false;
 
 const JobDescription = () => {
-    const { singleJob } = useSelector(store => store.job);
-    const { user } = useSelector(store => store.auth);
-    const isInitiallyApplied = hasUserApplied(singleJob?.applications, user?._id);
-    const [isApplied, setIsApplied] = useState(isInitiallyApplied);
+  const { singleJob } = useSelector(store => store.job);
+  const { user } = useSelector(store => store.auth);
+  const isInitiallyApplied = hasUserApplied(singleJob?.applications, user?._id);
+  const [isApplied, setIsApplied] = useState(isInitiallyApplied);
 
-    const params = useParams();
-    const jobId = params.id;
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const params = useParams();
+  const jobId = params.id;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const applyJobHandler = async () => {
-        try {
-            const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, { withCredentials: true });
-            if (res.data.success) {
-                setIsApplied(true);
-                const updatedSingleJob = { ...singleJob, applications: [...singleJob.applications, { applicant: user?._id }] }
-                dispatch(setSingleJob(updatedSingleJob));
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error(error.response?.data?.message || "Failed to apply.");
-        }
+  const heroRef = useRef(null);
+  const bodyRef = useRef(null);
+
+  const applyJobHandler = async () => {
+    try {
+      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, { withCredentials: true });
+      if (res.data.success) {
+        setIsApplied(true);
+        const updatedSingleJob = {
+          ...singleJob,
+          applications: [...singleJob.applications, { applicant: user?._id }]
+        };
+        dispatch(setSingleJob(updatedSingleJob));
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to apply.");
     }
+  }
 
-    useEffect(() => {
-        const fetchSingleJob = async () => {
-            try {
-                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, { withCredentials: true });
-                if (res.data.success) {
-                    dispatch(setSingleJob(res.data.job));
-                    const applied = hasUserApplied(res.data.job.applications, user?._id);
-                    // #region agent log
-                    fetch('http://127.0.0.1:7688/ingest/48fa31b3-06f2-4b31-be74-84d918315c47',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'7985e6'},body:JSON.stringify({sessionId:'7985e6',location:'JobDescription.jsx:fetchSingleJob',message:'applied status check',data:{userId:user?._id,applicantSamples:res.data.job.applications.slice(0,3).map(a=>({applicant:a.applicant,applicantType:typeof a.applicant,strictMatch:a.applicant===user?._id,stringMatch:String(a.applicant)===String(user?._id)})),computedApplied:applied},timestamp:Date.now(),hypothesisId:'E',runId:'post-fix'})}).catch(()=>{});
-                    // #endregion
-                    setIsApplied(applied)
-                }
-            } catch (error) {
-                console.log(error);
-            }
+  useEffect(() => {
+    const fetchSingleJob = async () => {
+      try {
+        const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, { withCredentials: true });
+        if (res.data.success) {
+          dispatch(setSingleJob(res.data.job));
+          const applied = hasUserApplied(res.data.job.applications, user?._id);
+          // #region agent log
+          fetch('http://127.0.0.1:7688/ingest/48fa31b3-06f2-4b31-be74-84d918315c47', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '7985e6' }, body: JSON.stringify({ sessionId: '7985e6', location: 'JobDescription.jsx:fetchSingleJob', message: 'applied status check', data: { userId: user?._id, applicantSamples: res.data.job.applications.slice(0, 3).map(a => ({ applicant: a.applicant, applicantType: typeof a.applicant, strictMatch: a.applicant === user?._id, stringMatch: String(a.applicant) === String(user?._id) })), computedApplied: applied }, timestamp: Date.now(), hypothesisId: 'E', runId: 'post-fix' }) }).catch(() => {});
+          // #endregion
+          setIsApplied(applied);
         }
-        fetchSingleJob();
-    }, [jobId, dispatch, user?._id]);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchSingleJob();
+  }, [jobId, dispatch, user?._id]);
 
-    const details = [
-        { icon: MapPin, label: 'Location', value: singleJob?.location },
-        { icon: Briefcase, label: 'Job Type', value: singleJob?.jobType },
-        { icon: Banknote, label: 'Salary', value: singleJob?.salary ? `${singleJob.salary} LPA` : null },
-        { icon: Clock, label: 'Experience', value: singleJob?.experienceLevel ? `${singleJob.experienceLevel} yrs` : null },
-        { icon: Users, label: 'Applicants', value: singleJob?.applications?.length },
-        { icon: Calendar, label: 'Posted Date', value: singleJob?.createdAt?.split("T")[0] },
-    ]
+  // GSAP entrance
+  useGSAP(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+    if (heroRef.current) {
+      tl.fromTo(heroRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.55 }
+      );
+    }
+    if (bodyRef.current) {
+      tl.fromTo(
+        bodyRef.current.children,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.5 },
+        '-=0.2'
+      );
+    }
+  }, { dependencies: [singleJob?._id] });
 
-    return (
-        <div className='min-h-screen bg-[#f8f9fa]'>
-            <Navbar />
+  const details = [
+    { icon: MapPin,     label: 'Location',    value: singleJob?.location },
+    { icon: Briefcase,  label: 'Job Type',    value: singleJob?.jobType },
+    { icon: Banknote,   label: 'Salary',      value: singleJob?.salary ? `₹${singleJob.salary} LPA` : null },
+    { icon: Clock,      label: 'Experience',  value: singleJob?.experienceLevel ? `${singleJob.experienceLevel} yrs` : null },
+    { icon: Users,      label: 'Applicants',  value: singleJob?.applications?.length },
+    { icon: Calendar,   label: 'Posted',      value: singleJob?.createdAt?.split("T")[0] },
+  ];
 
-            {/* Back Button */}
-            <div className='max-w-5xl mx-auto px-4 pt-6'>
-                <button
-                    onClick={() => navigate(-1)}
-                    className='inline-flex items-center gap-1.5 text-xs font-bold text-[#5e6475] hover:text-[#5d53c4] transition-colors cursor-pointer'
-                >
-                    <ArrowLeft className='w-3.5 h-3.5' />
-                    <span>Back to listings</span>
-                </button>
+  return (
+    <div className='min-h-screen bg-background'>
+      <Navbar />
+
+      {/* Back */}
+      <div className='max-w-5xl mx-auto px-4 lg:px-6 pt-6'>
+        <button
+          onClick={() => navigate(-1)}
+          className='inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
+        >
+          <ArrowLeft className='w-4 h-4' />
+          Back to listings
+        </button>
+      </div>
+
+      {/* Hero Card */}
+      <div className='max-w-5xl mx-auto px-4 lg:px-6 mt-5'>
+        <div
+          ref={heroRef}
+          className='bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6'
+          style={{ opacity: 0 }}
+        >
+          <div className='flex items-center gap-4'>
+            {/* Company logo */}
+            <div
+              className='w-16 h-16 rounded-xl border border-border flex items-center justify-center text-xl font-bold flex-shrink-0'
+              style={{ background: 'hsl(var(--primary) / 0.08)', color: 'hsl(var(--primary))' }}
+            >
+              {singleJob?.company?.name?.[0]?.toUpperCase() || <Building2 className='w-7 h-7' />}
             </div>
 
-            {/* Hero Banner Card */}
-            <div className='max-w-5xl mx-auto px-4 mt-4'>
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className='bg-white border border-[#ebedf5] p-6 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6'
-                >
-                    {/* Left details */}
-                    <div className='flex items-center gap-4'>
-                        <div className='w-14 h-14 rounded-2xl bg-[#f1efff] border border-[#e0dbff] flex items-center justify-center text-xl font-bold text-[#5d53c4] flex-shrink-0'>
-                            {singleJob?.company?.name?.[0]?.toUpperCase() || <Building2 className='w-6 h-6' />}
-                        </div>
-                        <div>
-                            <p className='text-[#5e6475] text-xs font-bold'>{singleJob?.company?.name}</p>
-                            <h1 className='text-xl md:text-2xl font-extrabold text-[#1a1a24] mt-0.5'>{singleJob?.title}</h1>
-                            <div className='flex flex-wrap gap-2 mt-2.5'>
-                                <span className='px-2.5 py-1 rounded-xl text-[10px] font-bold pastel-badge-blue'>
-                                    {singleJob?.position} Positions
-                                </span>
-                                <span className='px-2.5 py-1 rounded-xl text-[10px] font-bold pastel-badge-orange'>
-                                    {singleJob?.jobType}
-                                </span>
-                                <span className='px-2.5 py-1 rounded-xl text-[10px] font-bold pastel-badge-purple'>
-                                    {singleJob?.salary} LPA
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right button */}
-                    <button
-                        onClick={isApplied ? null : applyJobHandler}
-                        disabled={isApplied}
-                        className={`px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${isApplied
-                            ? 'bg-[#e2f6f0] border border-[#d2f2e8] text-[#1b7c5f] cursor-default'
-                            : 'btn-pastel-primary text-white shadow-sm'
-                        }`}
-                    >
-                        {isApplied ? (
-                            <><CheckCircle2 className='w-3.5 h-3.5' /> Applied</>
-                        ) : (
-                            <><Zap className='w-3.5 h-3.5' /> Apply Now</>
-                        )}
-                    </button>
-                </motion.div>
+            <div>
+              <p className='text-sm font-semibold text-muted-foreground'>{singleJob?.company?.name}</p>
+              <h1 className='text-2xl md:text-3xl font-extrabold text-foreground tracking-tight mt-0.5'>
+                {singleJob?.title}
+              </h1>
+              <div className='flex flex-wrap gap-2 mt-3'>
+                <span className='badge badge-blue'>
+                  <Briefcase className='w-3 h-3' />
+                  {singleJob?.position} Positions
+                </span>
+                <span className='badge badge-orange'>{singleJob?.jobType}</span>
+                <span className='badge badge-purple'>
+                  <Banknote className='w-3 h-3' />
+                  {singleJob?.salary} LPA
+                </span>
+              </div>
             </div>
+          </div>
 
-            {/* Content Area */}
-            <div className='max-w-5xl mx-auto px-4 py-8'>
-                <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-
-                    {/* Details Description */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className='lg:col-span-2 bg-white border border-[#ebedf5] p-6 rounded-3xl shadow-sm space-y-4'
-                    >
-                        <h2 className='font-bold text-[#1a1a24] text-sm pb-2.5 border-b border-[#ebedf5]'>Job Description</h2>
-                        <p className='text-[#5e6475] text-xs leading-relaxed'>{singleJob?.description}</p>
-
-                        {singleJob?.requirements?.length > 0 && (
-                            <div className='pt-2'>
-                                <h3 className='font-bold text-slate-800 mb-2.5 text-xs uppercase tracking-wider'>Requirements</h3>
-                                <ul className='space-y-2'>
-                                    {singleJob.requirements.map((req, idx) => (
-                                        <li key={idx} className='flex items-start gap-2 text-[#5e6475] text-xs font-semibold'>
-                                            <CheckCircle2 className='w-4.5 h-4.5 text-[#1b7c5f] flex-shrink-0 mt-0.5' />
-                                            <span>{req}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </motion.div>
-
-                    {/* Stats Sidebar */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className='bg-white border border-[#ebedf5] p-6 rounded-3xl shadow-sm h-fit space-y-5'
-                    >
-                        <h2 className='font-bold text-[#1a1a24] text-xs uppercase tracking-wider pb-2.5 border-b border-[#ebedf5]'>Job Details</h2>
-                        <div className='space-y-4'>
-                            {details.map(({ icon: Icon, label, value }) => value != null && (
-                                <div key={label} className='flex items-center gap-3'>
-                                    <div className='w-7 h-7 rounded-lg bg-[#f5f6fa] border border-[#ebedf5] flex items-center justify-center flex-shrink-0'>
-                                        <Icon className='w-3.5 h-3.5 text-[#5d53c4]' />
-                                    </div>
-                                    <div>
-                                        <p className='text-[10px] font-bold text-[#a0a6b5] uppercase tracking-wider leading-none'>{label}</p>
-                                        <p className='text-xs font-bold text-[#1a1a24] mt-1'>{value}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {!isApplied && (
-                            <button
-                                onClick={applyJobHandler}
-                                className='w-full btn-pastel-primary rounded-xl py-2.5 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm'
-                            >
-                                <Zap className='w-3.5 h-3.5' />
-                                Apply Now
-                            </button>
-                        )}
-                    </motion.div>
-                </div>
-            </div>
+          {/* Action buttons */}
+          <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-shrink-0'>
+            <button
+              className='w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors'
+              aria-label="Share job"
+            >
+              <Share2 className='w-4 h-4' />
+            </button>
+            <button
+              className='w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-amber-500 hover:border-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-colors'
+              aria-label="Save job"
+            >
+              <Bookmark className='w-4 h-4' />
+            </button>
+            <button
+              onClick={isApplied ? null : applyJobHandler}
+              disabled={isApplied}
+              className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all whitespace-nowrap ${
+                isApplied
+                  ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 cursor-default'
+                  : 'btn-primary cursor-pointer'
+              }`}
+            >
+              {isApplied ? (
+                <><CheckCircle2 className='w-4 h-4' /> Applied</>
+              ) : (
+                <><Zap className='w-4 h-4' /> Apply Now</>
+              )}
+            </button>
+          </div>
         </div>
-    )
+      </div>
+
+      {/* Content */}
+      <div className='max-w-5xl mx-auto px-4 lg:px-6 py-8'>
+        <div ref={bodyRef} className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+
+          {/* Description panel */}
+          <div
+            className='lg:col-span-2 bg-card border border-border rounded-xl p-6 shadow-sm space-y-6'
+            style={{ opacity: 0 }}
+          >
+            <div>
+              <h2 className='text-base font-bold text-foreground mb-3 pb-3 border-b border-border'>
+                Job Description
+              </h2>
+              <p className='text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap'>
+                {singleJob?.description}
+              </p>
+            </div>
+
+            {singleJob?.requirements?.length > 0 && (
+              <div>
+                <h3 className='text-sm font-bold text-foreground uppercase tracking-wider mb-4'>
+                  Requirements
+                </h3>
+                <ul className='space-y-2.5'>
+                  {singleJob.requirements.map((req, idx) => (
+                    <li key={idx} className='flex items-start gap-3 text-muted-foreground text-sm'>
+                      <CheckCircle2 className='w-4 h-4 text-green-500 flex-shrink-0 mt-0.5' />
+                      <span>{req}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div
+            className='bg-card border border-border rounded-xl p-5 shadow-sm h-fit space-y-5'
+            style={{ opacity: 0 }}
+          >
+            <h2 className='text-xs font-bold text-foreground uppercase tracking-wider pb-3 border-b border-border'>
+              Job Details
+            </h2>
+            <div className='space-y-4'>
+              {details.map(({ icon: Icon, label, value }) => value != null && (
+                <div key={label} className='flex items-center gap-3'>
+                  <div className='w-8 h-8 rounded-lg bg-primary/8 border border-border flex items-center justify-center flex-shrink-0'>
+                    <Icon className='w-4 h-4 text-primary' />
+                  </div>
+                  <div>
+                    <p className='text-xs font-medium text-muted-foreground'>{label}</p>
+                    <p className='text-sm font-semibold text-foreground mt-0.5'>{value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {!isApplied && (
+              <button
+                onClick={applyJobHandler}
+                className='btn-primary w-full flex items-center justify-center gap-2 py-2.5 text-sm rounded-lg cursor-pointer mt-2'
+              >
+                <Zap className='w-4 h-4' />
+                Apply Now
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
 }
 
 export default JobDescription

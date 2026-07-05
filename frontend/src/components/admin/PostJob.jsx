@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import Navbar from '../shared/Navbar'
-import { Label } from '../ui/label'
 import { useSelector } from 'react-redux'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import axios from 'axios'
@@ -8,7 +7,8 @@ import { JOB_API_END_POINT } from '@/utils/constant'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { Loader2, Save, FileText, MapPin, Briefcase, IndianRupee, Users, Star, ArrowLeft } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
 
 const PostJob = () => {
     const [input, setInput] = useState({
@@ -24,6 +24,7 @@ const PostJob = () => {
     });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const pageRef = useRef(null);
 
     const { companies } = useSelector(store => store.company);
     
@@ -47,9 +48,7 @@ const PostJob = () => {
         try {
             setLoading(true);
             const res = await axios.post(`${JOB_API_END_POINT}/post`, input, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 withCredentials: true
             });
             if (res.data.success) {
@@ -63,6 +62,20 @@ const PostJob = () => {
         }
     }
 
+    useGSAP(() => {
+        if (!pageRef.current) return;
+        const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+        tl.fromTo(pageRef.current.querySelector('.admin-header'),
+            { opacity: 0, y: -15 },
+            { opacity: 1, y: 0, duration: 0.5 }
+        )
+        .fromTo(pageRef.current.querySelector('.admin-card'),
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.5 },
+            '-=0.3'
+        );
+    }, { scope: pageRef });
+
     const fields = [
         { name: 'title', label: 'Job Opening Title', placeholder: 'React Developer', icon: Briefcase, type: 'text' },
         { name: 'description', label: 'Brief Summary description', placeholder: 'Seeking a skilled frontend builder...', icon: FileText, type: 'text' },
@@ -75,45 +88,40 @@ const PostJob = () => {
     ]
 
     return (
-        <div className='min-h-screen bg-[#f8f9fa]'>
+        <div className='min-h-screen bg-background'>
             <Navbar />
-            <div className='max-w-3xl mx-auto my-10 px-4 pb-16'>
+            <div ref={pageRef} className='max-w-3xl mx-auto my-10 px-4 pb-16'>
                 <form onSubmit={submitHandler} className='space-y-6'>
                     {/* Header */}
-                    <div className='flex items-center gap-3'>
+                    <div className='admin-header flex items-center gap-4' style={{ opacity: 0 }}>
                         <button
                             type="button"
                             onClick={() => navigate("/admin/jobs")}
-                            className='w-9 h-9 rounded-xl bg-white border border-[#ebedf5] flex items-center justify-center text-[#5e6475] hover:text-[#5d53c4] hover:border-[#e0dbff] hover:bg-[#f1efff] transition-all cursor-pointer'
+                            className='w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shadow-sm flex-shrink-0'
                         >
-                            <ArrowLeft className='w-4 h-4' />
+                            <ArrowLeft className='w-5 h-5' />
                         </button>
                         <div>
-                            <h1 className='text-xl font-extrabold text-[#1a1a24]'>Post Vacant Job Opening</h1>
-                            <p className='text-[#5e6475] text-xs font-semibold mt-0.5'>Provide details of the role to publish online</p>
+                            <h1 className='text-xl font-extrabold text-foreground tracking-tight'>Post Vacant Job Opening</h1>
+                            <p className='text-muted-foreground text-sm mt-0.5'>Provide details of the role to publish online</p>
                         </div>
                     </div>
 
                     {/* Edit Form Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className='bg-white border border-[#ebedf5] rounded-3xl p-8 space-y-6 shadow-sm'
-                    >
+                    <div className='admin-card bg-card border border-border rounded-2xl p-8 space-y-6 shadow-sm' style={{ opacity: 0 }}>
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
                             {fields.map(({ name, label, placeholder, icon: Icon, type }) => (
                                 <div key={name} className='space-y-1.5'>
-                                    <Label className='text-[#5e6475] text-[10px] font-bold uppercase tracking-wider'>{label}</Label>
+                                    <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>{label}</label>
                                     <div className='relative'>
-                                        <Icon className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a0a6b5]' />
+                                        <Icon className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
                                         <input
                                             type={type}
                                             name={name}
                                             value={input[name]}
                                             onChange={changeEventHandler}
                                             placeholder={placeholder}
-                                            className='w-full bg-[#f8f9fa] border border-[#e1e4ed] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1a1a24] placeholder:text-[#a0a6b5] outline-none focus:border-[#5d53c4] focus:bg-white transition-all'
+                                            className='input-premium pl-9 text-sm'
                                         />
                                     </div>
                                 </div>
@@ -121,19 +129,19 @@ const PostJob = () => {
 
                             {/* Select Company */}
                             <div className='space-y-1.5 md:col-span-2'>
-                                <Label className='text-[#5e6475] text-[10px] font-bold uppercase tracking-wider'>Associated Company</Label>
+                                <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>Associated Company</label>
                                 {companies.length > 0 ? (
                                     <Select onValueChange={selectChangeHandler}>
-                                        <SelectTrigger className="w-full bg-[#f8f9fa] border border-[#e1e4ed] rounded-xl h-11 text-slate-700 text-xs focus:ring-[#5d53c4] focus:border-[#5d53c4] outline-none">
+                                        <SelectTrigger className="w-full bg-card border border-border rounded-xl h-11 text-foreground text-sm outline-none hover:border-primary/40 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
                                             <SelectValue placeholder="Select a Company" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white border-[#ebedf5] text-slate-700">
+                                        <SelectContent className="bg-card border-border text-foreground">
                                             <SelectGroup>
                                                 {companies.map((company) => (
                                                     <SelectItem 
                                                         key={company._id} 
                                                         value={company?.name?.toLowerCase()}
-                                                        className="hover:bg-[#f1efff] focus:bg-[#f1efff] focus:text-[#5d53c4] cursor-pointer text-xs"
+                                                        className="hover:bg-muted focus:bg-muted focus:text-foreground cursor-pointer text-sm"
                                                     >
                                                         {company.name}
                                                     </SelectItem>
@@ -142,7 +150,7 @@ const PostJob = () => {
                                         </SelectContent>
                                     </Select>
                                 ) : (
-                                    <div className='p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-500 text-xs font-bold'>
+                                    <div className='p-3.5 rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-950/20 text-red-500 text-xs font-bold'>
                                         * Please register a company profile first before publishing jobs.
                                     </div>
                                 )}
@@ -150,30 +158,30 @@ const PostJob = () => {
                         </div>
 
                         {/* Submit Button */}
-                        <div className='pt-4 border-t border-[#ebedf5]'>
+                        <div className='pt-5 border-t border-border mt-4'>
                             {companies.length > 0 ? (
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className='w-full btn-pastel-primary rounded-xl py-3 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm'
+                                    className='w-full btn-primary rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm'
                                 >
                                     {loading ? (
-                                        <><Loader2 className='w-3.5 h-3.5 animate-spin' /> Publishing job...</>
+                                        <><Loader2 className='w-4 h-4 animate-spin' /> Publishing job...</>
                                     ) : (
-                                        <><Save className='w-3.5 h-3.5' /> Publish Job Opening</>
+                                        <><Save className='w-4 h-4' /> Publish Job Opening</>
                                     )}
                                 </button>
                             ) : (
                                 <button
                                     type="button"
                                     disabled
-                                    className='w-full bg-[#f8f9fa] border border-[#e1e4ed] text-[#cbd0dd] rounded-xl py-3 text-xs font-bold cursor-not-allowed'
+                                    className='w-full bg-muted border border-border text-muted-foreground rounded-xl py-3 text-sm font-bold cursor-not-allowed'
                                 >
                                     Register Company First
                                 </button>
                             )}
                         </div>
-                    </motion.div>
+                    </div>
                 </form>
             </div>
         </div>

@@ -1,264 +1,336 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
 import { toast } from 'sonner'
 import { useDispatch, useSelector } from 'react-redux'
-import { setLoading } from '@/redux/authSlice'
-import { Loader2, UserPlus, Mail, Lock, User, Phone, Briefcase, GraduationCap, Building2, Sparkles, Shield, Zap } from 'lucide-react'
-import { motion } from 'framer-motion'
-
-const perks = [
-    { icon: Zap, text: 'Apply to jobs instantly with 1 click' },
-    { icon: Shield, text: 'Your data is always private & secure' },
-    { icon: Sparkles, text: 'AI-powered job recommendations' },
-]
+import { setLoading, setUser } from '@/redux/authSlice'
+import { Loader2, Mail, Lock, User, Briefcase, GraduationCap, Building2, UploadCloud, ArrowLeft, ArrowRight, ImagePlus } from 'lucide-react'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
 
 const Signup = () => {
-    const [input, setInput] = useState({ fullname: '', email: '', phoneNumber: '', password: '', role: '', file: '' })
-    const { loading, user } = useSelector(store => store.auth)
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
+  const [input, setInput] = useState({
+    fullname: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    role: "",
+    file: ""
+  });
+  const [fileName, setFileName] = useState("");
+  const { loading, user } = useSelector(store => store.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const changeEventHandler = (e) => setInput({ ...input, [e.target.name]: e.target.value })
-    const changeFileHandler = (e) => setInput({ ...input, file: e.target.files?.[0] })
+  const formRef = useRef(null);
+  const panelRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-    const submitHandler = async (e) => {
-        e.preventDefault();
+  const changeEventHandler = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value });
+  }
 
-        // FIX: Check if role is selected to prevent bad requests
-        if (!input.role) {
-            toast.error("Please select whether you are a Job Seeker or a Recruiter.");
-            return;
-        }
+  const changeFileHandler = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setInput({ ...input, file });
+      setFileName(file.name);
+    }
+  }
 
-        // FIX: Construct the missing FormData object
-        const formData = new FormData();
-        formData.append("fullname", input.fullname);
-        formData.append("email", input.email);
-        formData.append("phoneNumber", input.phoneNumber);
-        formData.append("password", input.password);
-        formData.append("role", input.role);
-        
-        if (input.file) {
-            formData.append("file", input.file);
-        }
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (!input.role) {
+      toast.error("Please select a role (Job Seeker or Recruiter).");
+      return;
+    }
 
-        try {
-            dispatch(setLoading(true));
+    const formData = new FormData();
+    formData.append("fullname", input.fullname);
+    formData.append("email", input.email);
+    formData.append("phoneNumber", input.phoneNumber);
+    formData.append("password", input.password);
+    formData.append("role", input.role);
+    if (input.file) {
+      formData.append("file", input.file);
+    }
 
-            const res = await axios.post(
-                `${USER_API_END_POINT}/register`,
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    withCredentials: true,
-                    timeout: 60000, // 60s — accounts for Render free-tier cold start
-                }
-            );
+    try {
+      dispatch(setLoading(true));
+      const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
+        headers: { 'Content-Type': "multipart/form-data" },
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to register.");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
 
-            if (res.data?.success || res.status === 200 || res.status === 201) {
-                toast.success(res.data?.message || "Account created successfully!");
-                navigate("/login");
-            }
-        } catch (error) {
-            console.error(error);
-            if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-                toast.error("Server is waking up, please try again in a moment.");
-            } else {
-                toast.error(error.response?.data?.message || "Signup failed. Please try again.");
-            }
-        } finally {
-            dispatch(setLoading(false));
-        }
-    };
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
-    useEffect(() => {
-        dispatch(setLoading(false));
-        if (user) {
-            navigate("/");
-        }
-    }, [user, navigate, dispatch]);
-    
-    const fields = [
-        { name: 'fullname',    label: 'Full Name',     type: 'text',     placeholder: 'Raviraj Somavat', icon: User },
-        { name: 'email',       label: 'Email Address', type: 'email',    placeholder: 'you@example.com', icon: Mail },
-        { name: 'phoneNumber', label: 'Phone Number',  type: 'text',     placeholder: '9876543210',      icon: Phone },
-        { name: 'password',    label: 'Password',      type: 'password', placeholder: '••••••••',        icon: Lock },
-    ]
+  useGSAP(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    if (panelRef.current) {
+      tl.fromTo(panelRef.current,
+        { x: 60, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.7 }
+      );
+    }
+    if (formRef.current) {
+      tl.fromTo(formRef.current.children,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.05, duration: 0.4 },
+        '-=0.4'
+      );
+    }
+  }, []);
 
-    return (
-        <div className='min-h-screen flex'>
-            {/* ── Left Branding Panel ── */}
-            <div className='hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between relative overflow-hidden bg-[#5d53c4] p-10'>
-                {/* Soft bg blobs */}
-                <div className='absolute inset-0 pointer-events-none'>
-                    <div className='absolute top-[-80px] right-[-60px] w-96 h-96 rounded-full bg-white/5' />
-                    <div className='absolute bottom-[-60px] left-[-40px] w-80 h-80 rounded-full bg-white/5' />
-                </div>
+  return (
+    <div className='min-h-screen flex bg-background'>
 
-                {/* Logo */}
-                <div className='relative z-10 flex items-center gap-2.5'>
-                    <div className='w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center'>
-                        <Briefcase className='w-5 h-5 text-white' />
-                    </div>
-                    <span className='text-white font-bold text-lg'>Job<span className='text-purple-200'>Portal</span></span>
-                </div>
-
-                {/* Main copy */}
-                <div className='relative z-10 space-y-6'>
-                    <div className='inline-flex items-center gap-1.5 bg-white/10 border border-white/20 px-3 py-1.5 rounded-full'>
-                        <Sparkles className='w-3.5 h-3.5 text-purple-200' />
-                        <span className='text-purple-100 text-xs font-semibold'>Join 50,000+ professionals</span>
-                    </div>
-                    <h2 className='text-3xl xl:text-4xl font-extrabold text-white leading-tight'>
-                        Start your career<br />
-                        journey<br />
-                        <span className='text-purple-200'>today.</span>
-                    </h2>
-                    <p className='text-purple-100/80 text-sm leading-relaxed max-w-xs'>
-                        Create a free account and get matched with top companies in minutes.
-                    </p>
-
-                    {/* Perks list */}
-                    <div className='space-y-3 pt-2'>
-                        {perks.map(({ icon: Icon, text }) => (
-                            <div key={text} className='flex items-center gap-3'>
-                                <div className='w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0'>
-                                    <Icon className='w-3.5 h-3.5 text-white' />
-                                </div>
-                                <span className='text-purple-100/90 text-sm'>{text}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Bottom free badge */}
-                <div className='relative z-10 bg-white/8 border border-white/12 rounded-2xl p-4 flex items-center gap-3'>
-                    <div className='w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0'>
-                        <Sparkles className='w-5 h-5 text-purple-200' />
-                    </div>
-                    <div>
-                        <p className='text-white font-bold text-sm'>It's completely free</p>
-                        <p className='text-purple-200/70 text-xs mt-0.5'>No credit card required. Ever.</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Right Form Panel ── */}
-            <div className='flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-20 bg-[#f8f9fa] min-h-screen py-12'>
-                {/* Mobile logo */}
-                <div className='lg:hidden flex items-center gap-2 mb-8'>
-                    <div className='w-8 h-8 rounded-xl bg-[#5d53c4] flex items-center justify-center'>
-                        <Briefcase className='w-4 h-4 text-white' />
-                    </div>
-                    <span className='font-bold text-[#1a1a24]'>Job<span className='text-[#5d53c4]'>Portal</span></span>
-                </div>
-
-                <motion.div
-                    initial={{ opacity: 0, x: 24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className='w-full max-w-sm mx-auto'
-                >
-                    {/* Heading */}
-                    <div className='mb-7'>
-                        <h1 className='text-2xl font-extrabold text-[#1a1a24]'>Create account ✨</h1>
-                        <p className='text-[#5e6475] text-sm font-medium mt-1'>Fill in the details below to get started</p>
-                    </div>
-
-                    <form onSubmit={submitHandler} className='space-y-4'>
-                        {/* Text fields */}
-                        {fields.map(({ name, label, type, placeholder, icon: Icon }) => (
-                            <div key={name} className='space-y-1.5'>
-                                <label className='text-[#5e6475] text-[11px] font-bold uppercase tracking-wider block'>{label}</label>
-                                <div className='relative'>
-                                    <Icon className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a0a6b5]' />
-                                    <input
-                                        type={type}
-                                        name={name}
-                                        value={input[name]}
-                                        onChange={changeEventHandler}
-                                        placeholder={placeholder}
-                                        required
-                                        className='w-full bg-white border border-[#e1e4ed] rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1a1a24] placeholder:text-[#c0c6d5] outline-none focus:border-[#5d53c4] focus:ring-2 focus:ring-[#5d53c4]/10 transition-all'
-                                    />
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Role selector */}
-                        <div className='space-y-2'>
-                            <label className='text-[#5e6475] text-[11px] font-bold uppercase tracking-wider block'>I am joining as</label>
-                            <div className='grid grid-cols-2 gap-3'>
-                                {[
-                                    { value: 'student',   label: 'Job Seeker', icon: GraduationCap },
-                                    { value: 'recruiter', label: 'Recruiter',  icon: Building2 },
-                                ].map(({ value, label, icon: Icon }) => (
-                                    <label
-                                        key={value}
-                                        className={`flex flex-col items-center justify-center gap-1.5 py-3.5 px-3 rounded-2xl border-2 cursor-pointer transition-all ${
-                                            input.role === value
-                                                ? 'border-[#5d53c4] bg-[#5d53c4] text-white shadow-lg shadow-purple-500/20'
-                                                : 'border-[#ebedf5] bg-white text-[#5e6475] hover:border-[#5d53c4]/40'
-                                        }`}
-                                    >
-                                        <Icon className={`w-5 h-5 ${input.role === value ? 'text-white' : 'text-[#5d53c4]'}`} />
-                                        <span className='text-xs font-bold'>{label}</span>
-                                        <input type='radio' name='role' value={value} checked={input.role === value} onChange={changeEventHandler} className='sr-only' />
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Avatar upload */}
-                        <div className='space-y-1.5'>
-                            <label className='text-[#5e6475] text-[11px] font-bold uppercase tracking-wider block'>Profile Photo (optional)</label>
-                            <label className='flex items-center gap-3 p-3 rounded-2xl border-2 border-dashed border-[#e1e4ed] bg-white cursor-pointer hover:border-[#5d53c4]/50 transition-all group'>
-                                <div className='w-9 h-9 rounded-xl bg-[#f1efff] flex items-center justify-center flex-shrink-0'>
-                                    <UserPlus className='w-4 h-4 text-[#5d53c4]' />
-                                </div>
-                                <div className='flex-1 min-w-0'>
-                                    <p className='text-xs font-semibold text-[#a0a6b5] group-hover:text-[#5d53c4] truncate transition-colors'>
-                                        {input.file ? input.file.name : 'Click to upload photo'}
-                                    </p>
-                                    <p className='text-[10px] text-[#c0c6d5] mt-0.5'>PNG, JPG up to 5MB</p>
-                                </div>
-                                <input type='file' accept='image/*' onChange={changeFileHandler} className='hidden' />
-                            </label>
-                        </div>
-
-                        {/* Submit */}
-                        <button
-                            type='submit'
-                            disabled={loading}
-                            className='w-full bg-[#5d53c4] hover:bg-[#4b41b3] text-white font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2'
-                        >
-                            {loading ? <><Loader2 className='w-4 h-4 animate-spin' /> Creating account...</> : <><UserPlus className='w-4 h-4' /> Create Account</>}
-                        </button>
-
-                        {/* Divider */}
-                        <div className='flex items-center gap-3 py-1'>
-                            <div className='flex-1 h-px bg-[#ebedf5]' />
-                            <span className='text-[#a0a6b5] text-xs font-semibold'>Have an account?</span>
-                            <div className='flex-1 h-px bg-[#ebedf5]' />
-                        </div>
-
-                        <Link to='/login'>
-                            <button
-                                type='button'
-                                className='w-full bg-white border-2 border-[#ebedf5] hover:border-[#5d53c4]/40 text-[#1a1a24] font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer'
-                            >
-                                Sign in instead →
-                            </button>
-                        </Link>
-                    </form>
-                </motion.div>
-            </div>
+      {/* Left form panel */}
+      <div className='flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 xl:px-24 bg-background min-h-screen py-10 overflow-y-auto'>
+        {/* Mobile logo */}
+        <div className='lg:hidden flex items-center gap-2 mb-8'>
+          <div className='w-8 h-8 rounded-xl flex items-center justify-center'
+            style={{ background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)' }}>
+            <Briefcase className='w-4 h-4 text-white' />
+          </div>
+          <span className='font-bold text-foreground'>Job<span className='text-gradient'>Portal</span></span>
         </div>
-    )
+
+        <div ref={formRef} className='w-full max-w-md mx-auto'>
+          {/* Header */}
+          <div className='mb-8' style={{ opacity: 0 }}>
+            <Link to="/login" className='inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground mb-4 transition-colors'>
+              <ArrowLeft className='w-3.5 h-3.5' /> Back to Login
+            </Link>
+            <h1 className='text-2xl font-extrabold text-foreground tracking-tight'>Create an account</h1>
+            <p className='text-muted-foreground text-sm mt-1.5'>Join JobPortal and accelerate your career</p>
+          </div>
+
+          <form onSubmit={submitHandler} className='space-y-4'>
+            {/* Full Name */}
+            <div className='space-y-1.5' style={{ opacity: 0 }}>
+              <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
+                Full Name
+              </label>
+              <div className='relative'>
+                <User className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+                <input
+                  type='text'
+                  name='fullname'
+                  value={input.fullname}
+                  onChange={changeEventHandler}
+                  placeholder='John Doe'
+                  className='input-premium pl-10'
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Email & Phone Grid */}
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4' style={{ opacity: 0 }}>
+              <div className='space-y-1.5'>
+                <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
+                  Email Address
+                </label>
+                <div className='relative'>
+                  <Mail className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+                  <input
+                    type='email'
+                    name='email'
+                    value={input.email}
+                    onChange={changeEventHandler}
+                    placeholder='john@example.com'
+                    className='input-premium pl-10'
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className='space-y-1.5'>
+                <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
+                  Phone Number
+                </label>
+                <div className='relative'>
+                  <span className='absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-semibold'>+91</span>
+                  <input
+                    type='text'
+                    name='phoneNumber'
+                    value={input.phoneNumber}
+                    onChange={changeEventHandler}
+                    placeholder='9876543210'
+                    className='input-premium pl-10'
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className='space-y-1.5' style={{ opacity: 0 }}>
+              <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
+                Password
+              </label>
+              <div className='relative'>
+                <Lock className='absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+                <input
+                  type='password'
+                  name='password'
+                  value={input.password}
+                  onChange={changeEventHandler}
+                  placeholder='••••••••'
+                  className='input-premium pl-10'
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Role selector */}
+            <div className='space-y-2 pt-1' style={{ opacity: 0 }}>
+              <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
+                I am signing up as a
+              </label>
+              <div className='grid grid-cols-2 gap-3'>
+                {[
+                  { value: 'student', label: 'Job Seeker', icon: GraduationCap },
+                  { value: 'recruiter', label: 'Recruiter', icon: Building2 },
+                ].map(({ value, label, icon: Icon }) => (
+                  <label
+                    key={value}
+                    className={`flex flex-col items-center justify-center gap-1.5 py-3 px-3 rounded-xl border-2 cursor-pointer transition-all ${
+                      input.role === value
+                        ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
+                        : 'border-border bg-card text-muted-foreground hover:border-primary/40 hover:bg-muted'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${input.role === value ? 'text-white' : 'text-primary'}`} />
+                    <span className='text-xs font-semibold'>{label}</span>
+                    <input type='radio' name='role' value={value} checked={input.role === value} onChange={changeEventHandler} className='sr-only' />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Profile Photo Upload */}
+            <div className='space-y-1.5 pt-1' style={{ opacity: 0 }}>
+              <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
+                Profile Photo <span className='text-muted-foreground lowercase normal-case font-medium'>(Optional)</span>
+              </label>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className='flex items-center gap-3 p-3 border-2 border-dashed border-border rounded-xl bg-card hover:bg-muted transition-colors cursor-pointer group'
+              >
+                <div className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                  {fileName ? <ImagePlus className='w-4 h-4 text-primary' /> : <UploadCloud className='w-4 h-4 text-primary' />}
+                </div>
+                <div className='flex-1 min-w-0'>
+                  <p className='text-sm font-semibold text-foreground truncate'>
+                    {fileName || 'Upload a photo'}
+                  </p>
+                  <p className='text-xs text-muted-foreground'>JPEG, PNG up to 2MB</p>
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={changeFileHandler}
+                className="hidden"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type='submit'
+              disabled={loading}
+              className='btn-primary w-full flex items-center justify-center gap-2 py-3.5 text-sm rounded-xl mt-4'
+              style={{ opacity: 0 }}
+            >
+              {loading
+                ? <><Loader2 className='w-4 h-4 animate-spin' /> Creating account...</>
+                : 'Create Account'
+              }
+            </button>
+            
+            <p className='text-center text-xs text-muted-foreground mt-4' style={{ opacity: 0 }}>
+              Already have an account? <Link to="/login" className='text-primary font-semibold hover:underline'>Sign in</Link>
+            </p>
+          </form>
+        </div>
+      </div>
+
+      {/* Right branding panel */}
+      <div
+        ref={panelRef}
+        className='hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between relative overflow-hidden'
+        style={{
+          background: 'linear-gradient(145deg, #0c4a6e 0%, #4c1d95 50%, #1e3a8a 100%)',
+          opacity: 0
+        }}
+      >
+        <div className='absolute inset-0 pointer-events-none overflow-hidden'>
+          <div className='absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/5 blur-xl' />
+          <div className='absolute bottom-10 left-10 w-96 h-96 rounded-full bg-white/5 blur-xl' />
+        </div>
+        <div className='absolute inset-0 opacity-[0.06]'
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)`,
+            backgroundSize: '32px 32px',
+          }}
+        />
+
+        <div className='relative z-10 p-10 flex flex-col h-full'>
+          <div className='flex items-center gap-2.5 ml-auto'>
+            <span className='text-white font-bold text-lg tracking-tight'>
+              Job<span className='text-blue-200'>Portal</span>
+            </span>
+            <div className='w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center'>
+              <Briefcase className='w-5 h-5 text-white' />
+            </div>
+          </div>
+
+          <div className='mt-auto space-y-6'>
+            <h2 className='text-3xl xl:text-4xl font-extrabold text-white leading-tight tracking-tight'>
+              Fast-track your<br />
+              <span className='text-blue-200'>professional journey</span>.
+            </h2>
+            <div className='space-y-4 pt-4 border-t border-white/10'>
+              {[
+                { title: 'One-click apply', desc: 'Save time by using your profile to apply instantly.' },
+                { title: 'Curated matches', desc: 'Get recommendations based on your skills and preferences.' },
+                { title: 'Direct contact', desc: 'Connect directly with recruiters from top companies.' },
+              ].map((item, idx) => (
+                <div key={idx} className='flex gap-3'>
+                  <div className='w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5'>
+                    <div className='w-2 h-2 rounded-full bg-blue-300' />
+                  </div>
+                  <div>
+                    <h3 className='text-white font-bold text-sm'>{item.title}</h3>
+                    <p className='text-blue-200/70 text-xs mt-0.5'>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
-export default Signup;
+export default Signup

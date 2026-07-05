@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Navbar from '../shared/Navbar'
 import { ArrowLeft, Loader2, Save, FileText, Image, Globe, MapPin, AlignLeft, Info } from 'lucide-react'
-import { Label } from '../ui/label'
 import axios from 'axios'
 import { COMPANY_API_END_POINT } from '@/utils/constant'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useSelector } from 'react-redux'
 import useGetCompanyById from '@/hooks/useGetCompanyById'
-import { motion } from 'framer-motion'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
 
 const CompanySetup = () => {
     const params = useParams();
@@ -23,6 +23,7 @@ const CompanySetup = () => {
     const { singleCompany } = useSelector(store => store.company);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const pageRef = useRef(null);
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
@@ -46,9 +47,7 @@ const CompanySetup = () => {
         try {
             setLoading(true);
             const res = await axios.put(`${COMPANY_API_END_POINT}/update/${params.id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true
             });
             if (res.data.success) {
@@ -73,6 +72,20 @@ const CompanySetup = () => {
         })
     }, [singleCompany]);
 
+    useGSAP(() => {
+        if (!pageRef.current) return;
+        const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+        tl.fromTo(pageRef.current.querySelector('.admin-header'),
+            { opacity: 0, y: -15 },
+            { opacity: 1, y: 0, duration: 0.5 }
+        )
+        .fromTo(pageRef.current.querySelector('.admin-card'),
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.5 },
+            '-=0.3'
+        );
+    }, { scope: pageRef });
+
     const fields = [
         { name: 'name', label: 'Company Name', placeholder: 'JobHunt Inc.', icon: Info },
         { name: 'description', label: 'Company Description', placeholder: 'A leading SaaS provider...', icon: AlignLeft },
@@ -81,45 +94,40 @@ const CompanySetup = () => {
     ]
 
     return (
-        <div className='min-h-screen bg-[#f8f9fa]'>
+        <div className='min-h-screen bg-background'>
             <Navbar />
-            <div className='max-w-3xl mx-auto my-10 px-4 pb-16'>
+            <div ref={pageRef} className='max-w-3xl mx-auto my-10 px-4 pb-16'>
                 <form onSubmit={submitHandler} className='space-y-6'>
                     {/* Header */}
-                    <div className='flex items-center gap-3'>
+                    <div className='admin-header flex items-center gap-4' style={{ opacity: 0 }}>
                         <button
                             type="button"
                             onClick={() => navigate("/admin/companies")}
-                            className='w-9 h-9 rounded-xl bg-white border border-[#ebedf5] flex items-center justify-center text-[#5e6475] hover:text-[#5d53c4] hover:border-[#e0dbff] hover:bg-[#f1efff] transition-all cursor-pointer'
+                            className='w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer shadow-sm flex-shrink-0'
                         >
-                            <ArrowLeft className='w-4 h-4' />
+                            <ArrowLeft className='w-5 h-5' />
                         </button>
                         <div>
-                            <h1 className='text-xl font-extrabold text-[#1a1a24]'>Company Onboarding Details</h1>
-                            <p className='text-[#5e6475] text-xs font-semibold mt-0.5'>Provide brand name, logo and summary profile details</p>
+                            <h1 className='text-xl font-extrabold text-foreground tracking-tight'>Company Setup</h1>
+                            <p className='text-muted-foreground text-sm mt-0.5'>Provide brand name, logo and summary profile details</p>
                         </div>
                     </div>
 
                     {/* Form Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className='bg-white border border-[#ebedf5] rounded-3xl p-8 space-y-6 shadow-sm'
-                    >
+                    <div className='admin-card bg-card border border-border rounded-2xl p-8 space-y-6 shadow-sm' style={{ opacity: 0 }}>
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
                             {fields.map(({ name, label, placeholder, icon: Icon }) => (
                                 <div key={name} className='space-y-1.5'>
-                                    <Label className='text-[#5e6475] text-[10px] font-bold uppercase tracking-wider'>{label}</Label>
+                                    <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>{label}</label>
                                     <div className='relative'>
-                                        <Icon className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a0a6b5]' />
+                                        <Icon className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
                                         <input
                                             type="text"
                                             name={name}
                                             value={input[name]}
                                             onChange={changeEventHandler}
                                             placeholder={placeholder}
-                                            className='w-full bg-[#f8f9fa] border border-[#e1e4ed] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#1a1a24] placeholder:text-[#a0a6b5] outline-none focus:border-[#5d53c4] focus:bg-white transition-all'
+                                            className='input-premium pl-9 text-sm'
                                         />
                                     </div>
                                 </div>
@@ -127,14 +135,14 @@ const CompanySetup = () => {
 
                             {/* File Upload */}
                             <div className='space-y-1.5 md:col-span-2'>
-                                <Label className='text-[#5e6475] text-[10px] font-bold uppercase tracking-wider'>Company Logo Image</Label>
-                                <label className='flex items-center gap-3 p-3 rounded-xl border border-[#ebedf5] bg-[#f8f9fa] cursor-pointer hover:border-[#5d53c4]/50 transition-all group'>
-                                    <div className='w-8 h-8 rounded-lg bg-[#e8f4fd] border border-[#d1e8fc] flex items-center justify-center flex-shrink-0'>
-                                        <Image className='w-4 h-4 text-[#0d47a1]' />
+                                <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>Company Logo</label>
+                                <label className='flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-border bg-card hover:bg-muted cursor-pointer transition-all group'>
+                                    <div className='w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0'>
+                                        <Image className='w-5 h-5 text-primary' />
                                     </div>
                                     <div className='flex-1 min-w-0'>
-                                        <p className='text-xs text-[#a0a6b5] group-hover:text-slate-600 truncate'>
-                                            {input.file ? (typeof input.file === 'object' ? input.file.name : input.file.split('/').pop()) : 'Select business logo photo'}
+                                        <p className='text-sm font-semibold text-foreground truncate'>
+                                            {input.file ? (typeof input.file === 'object' ? input.file.name : input.file.split('/').pop()) : 'Upload logo image'}
                                         </p>
                                     </div>
                                     <input
@@ -146,28 +154,28 @@ const CompanySetup = () => {
                                 </label>
                                 {singleCompany?.logo && (
                                     <div className='flex items-center gap-2 mt-2 px-1'>
-                                        <span className='text-[10px] font-bold text-[#a0a6b5] uppercase tracking-wider'>Active Logo:</span>
-                                        <img src={singleCompany.logo} alt="current logo" className='w-6 h-6 rounded-md object-cover border border-[#ebedf5]' />
+                                        <span className='text-[10px] font-bold text-muted-foreground uppercase tracking-wider'>Active Logo:</span>
+                                        <img src={singleCompany.logo} alt="current logo" className='w-6 h-6 rounded-md object-cover border border-border bg-white' />
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Submit Actions */}
-                        <div className='pt-4 border-t border-[#ebedf5]'>
+                        <div className='pt-5 border-t border-border mt-4'>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className='w-full btn-pastel-primary rounded-xl py-3 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm'
+                                className='w-full btn-primary rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm'
                             >
                                 {loading ? (
-                                    <><Loader2 className='w-3.5 h-3.5 animate-spin' /> Saving details...</>
+                                    <><Loader2 className='w-4 h-4 animate-spin' /> Saving...</>
                                 ) : (
-                                    <><Save className='w-3.5 h-3.5' /> Save Changes</>
+                                    <><Save className='w-4 h-4' /> Save Changes</>
                                 )}
                             </button>
                         </div>
-                    </motion.div>
+                    </div>
                 </form>
             </div>
         </div>
