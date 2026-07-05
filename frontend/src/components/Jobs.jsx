@@ -17,9 +17,7 @@ const Jobs = () => {
   const contentRef = useRef(null);
 
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7688/ingest/48fa31b3-06f2-4b31-be74-84d918315c47', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '7985e6' }, body: JSON.stringify({ sessionId: '7985e6', location: 'Jobs.jsx:mount', message: 'Jobs page mounted', data: { allJobsCount: allJobs?.length, hasUseGetAllJobsHook: true }, timestamp: Date.now(), hypothesisId: 'B', runId: 'post-fix' }) }).catch(() => {});
-    // #endregion
+   
   }, []);
 
   useEffect(() => {

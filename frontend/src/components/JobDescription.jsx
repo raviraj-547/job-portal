@@ -56,9 +56,7 @@ const JobDescription = () => {
         if (res.data.success) {
           dispatch(setSingleJob(res.data.job));
           const applied = hasUserApplied(res.data.job.applications, user?._id);
-          // #region agent log
-          fetch('http://127.0.0.1:7688/ingest/48fa31b3-06f2-4b31-be74-84d918315c47', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '7985e6' }, body: JSON.stringify({ sessionId: '7985e6', location: 'JobDescription.jsx:fetchSingleJob', message: 'applied status check', data: { userId: user?._id, applicantSamples: res.data.job.applications.slice(0, 3).map(a => ({ applicant: a.applicant, applicantType: typeof a.applicant, strictMatch: a.applicant === user?._id, stringMatch: String(a.applicant) === String(user?._id) })), computedApplied: applied }, timestamp: Date.now(), hypothesisId: 'E', runId: 'post-fix' }) }).catch(() => {});
-          // #endregion
+          
           setIsApplied(applied);
         }
       } catch (error) {
