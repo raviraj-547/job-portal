@@ -132,11 +132,10 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className='border-t border-border mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3'>
           <p className='text-xs text-muted-foreground'>
-            © {currentYear} JobPortal, Inc. All rights reserved.
+            © {currentYear}  All rights reserved.
           </p>
           <div className='flex items-center gap-1 text-xs text-muted-foreground'>
-            <span>Crafted for ambitious careers</span>
-            <span className='text-red-400'>♥</span>
+            <span>Built with ❤️ by Raviraj Somavat</span>
           </div>
         </div>
       </div>
