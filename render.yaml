@@ -1,11 +1,32 @@
 services:
+  # Backend Node Server
+  - type: web
+    name: job-portal-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: job-portal-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+      # Note: You will need to manually add MONGO_URI and SECRET_KEY in your Render dashboard for this service.
+
   # Frontend Static Site
   - type: web
     name: job-portal-frontend
     env: static
     rootDir: frontend
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     publishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: job-portal-backend
+          envVarKey: RENDER_EXTERNAL_URL
     routes:
       # Catch-all rewrite for React Router SPA (resolves 404 on refresh/direct load)
       - src: /*

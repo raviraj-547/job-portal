@@ -89,7 +89,8 @@ const Signup = () => {
       );
     }
     if (formRef.current) {
-      tl.fromTo(formRef.current.children,
+      const elements = formRef.current.querySelectorAll('.animate-in');
+      tl.fromTo(elements,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, stagger: 0.05, duration: 0.4 },
         '-=0.4'
@@ -113,7 +114,7 @@ const Signup = () => {
 
         <div ref={formRef} className='w-full max-w-md mx-auto'>
           {/* Header */}
-          <div className='mb-8' style={{ opacity: 0 }}>
+          <div className='mb-8 animate-in' style={{ opacity: 0 }}>
             <Link to="/login" className='inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground mb-4 transition-colors'>
               <ArrowLeft className='w-3.5 h-3.5' /> Back to Login
             </Link>
@@ -123,7 +124,7 @@ const Signup = () => {
 
           <form onSubmit={submitHandler} className='space-y-4'>
             {/* Full Name */}
-            <div className='space-y-1.5' style={{ opacity: 0 }}>
+            <div className='space-y-1.5 animate-in' style={{ opacity: 0 }}>
               <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                 Full Name
               </label>
@@ -142,7 +143,7 @@ const Signup = () => {
             </div>
 
             {/* Email & Phone Grid */}
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4' style={{ opacity: 0 }}>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in' style={{ opacity: 0 }}>
               <div className='space-y-1.5'>
                 <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                   Email Address
@@ -181,7 +182,7 @@ const Signup = () => {
             </div>
 
             {/* Password */}
-            <div className='space-y-1.5' style={{ opacity: 0 }}>
+            <div className='space-y-1.5 animate-in' style={{ opacity: 0 }}>
               <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                 Password
               </label>
@@ -200,7 +201,7 @@ const Signup = () => {
             </div>
 
             {/* Role selector */}
-            <div className='space-y-2 pt-1' style={{ opacity: 0 }}>
+            <div className='space-y-2 pt-1 animate-in' style={{ opacity: 0 }}>
               <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                 I am signing up as a
               </label>
@@ -226,7 +227,7 @@ const Signup = () => {
             </div>
 
             {/* Profile Photo Upload */}
-            <div className='space-y-1.5 pt-1' style={{ opacity: 0 }}>
+            <div className='space-y-1.5 pt-1 animate-in' style={{ opacity: 0 }}>
               <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                 Profile Photo <span className='text-muted-foreground lowercase normal-case font-medium'>(Optional)</span>
               </label>
@@ -257,7 +258,7 @@ const Signup = () => {
             <button
               type='submit'
               disabled={loading}
-              className='btn-primary w-full flex items-center justify-center gap-2 py-3.5 text-sm rounded-xl mt-4'
+              className='btn-primary w-full flex items-center justify-center gap-2 py-3.5 text-sm rounded-xl mt-4 animate-in'
               style={{ opacity: 0 }}
             >
               {loading
@@ -266,7 +267,7 @@ const Signup = () => {
               }
             </button>
             
-            <p className='text-center text-xs text-muted-foreground mt-4' style={{ opacity: 0 }}>
+            <p className='text-center text-xs text-muted-foreground mt-4 animate-in' style={{ opacity: 0 }}>
               Already have an account? <Link to="/login" className='text-primary font-semibold hover:underline'>Sign in</Link>
             </p>
           </form>

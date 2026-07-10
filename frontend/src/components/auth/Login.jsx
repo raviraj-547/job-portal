@@ -70,7 +70,8 @@ const Login = () => {
       );
     }
     if (formRef.current) {
-      tl.fromTo(formRef.current.children,
+      const elements = formRef.current.querySelectorAll('.animate-in');
+      tl.fromTo(elements,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, stagger: 0.07, duration: 0.5 },
         '-=0.4'
@@ -172,14 +173,14 @@ const Login = () => {
 
         <div ref={formRef} className='w-full max-w-sm mx-auto'>
           {/* Heading */}
-          <div className='mb-8' style={{ opacity: 0 }}>
+          <div className='mb-8 animate-in' style={{ opacity: 0 }}>
             <h1 className='text-2xl font-extrabold text-foreground tracking-tight'>Welcome back 👋</h1>
             <p className='text-muted-foreground text-sm mt-1.5'>Sign in to your JobPortal account</p>
           </div>
 
           <form onSubmit={submitHandler} className='space-y-5'>
             {/* Email */}
-            <div className='space-y-1.5' style={{ opacity: 0 }}>
+            <div className='space-y-1.5 animate-in' style={{ opacity: 0 }}>
               <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                 Email Address
               </label>
@@ -198,7 +199,7 @@ const Login = () => {
             </div>
 
             {/* Password */}
-            <div className='space-y-1.5' style={{ opacity: 0 }}>
+            <div className='space-y-1.5 animate-in' style={{ opacity: 0 }}>
               <div className='flex items-center justify-between'>
                 <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                   Password
@@ -220,7 +221,7 @@ const Login = () => {
             </div>
 
             {/* Role selector */}
-            <div className='space-y-2' style={{ opacity: 0 }}>
+            <div className='space-y-2 animate-in' style={{ opacity: 0 }}>
               <label className='text-xs font-semibold text-foreground uppercase tracking-wider block'>
                 I am signing in as
               </label>
@@ -249,7 +250,7 @@ const Login = () => {
             <button
               type='submit'
               disabled={loading}
-              className='btn-primary w-full flex items-center justify-center gap-2 py-3.5 text-sm rounded-xl'
+              className='btn-primary w-full flex items-center justify-center gap-2 py-3.5 text-sm rounded-xl animate-in'
               style={{ opacity: 0 }}
             >
               {loading
@@ -259,13 +260,13 @@ const Login = () => {
             </button>
 
             {/* Divider */}
-            <div className='flex items-center gap-3' style={{ opacity: 0 }}>
+            <div className='flex items-center gap-3 animate-in' style={{ opacity: 0 }}>
               <div className='flex-1 h-px bg-border' />
               <span className='text-muted-foreground text-xs font-medium'>New here?</span>
               <div className='flex-1 h-px bg-border' />
             </div>
 
-            <Link to='/signup' style={{ opacity: 0, display: 'block' }}>
+            <Link to='/signup' className='animate-in' style={{ opacity: 0, display: 'block' }}>
               <button
                 type='button'
                 className='btn-secondary w-full flex items-center justify-center gap-2 py-3.5 text-sm rounded-xl'
